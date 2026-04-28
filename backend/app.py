@@ -6,7 +6,11 @@ import json, os
 app = Flask(__name__)
 CORS(app)
 
-client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+api_key = os.environ.get("ANTHROPIC_API_KEY")
+if not api_key:
+    raise RuntimeError("Environment variable ANTHROPIC_API_KEY is required")
+
+client = anthropic.Anthropic(api_key=api_key)
 
 DATA_FILE = "data/training_data.json"
 if not os.path.exists("data"):
