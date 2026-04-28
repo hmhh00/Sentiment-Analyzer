@@ -1,16 +1,13 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import anthropic
+import google.generativeai as genai
 import json, os
 
 app = Flask(__name__)
 CORS(app)
 
-api_key = os.environ.get("ANTHROPIC_API_KEY")
-if not api_key:
-    raise RuntimeError("Environment variable ANTHROPIC_API_KEY is required")
-
-client = anthropic.Anthropic(api_key=api_key)
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 DATA_FILE = "data/training_data.json"
 if not os.path.exists("data"):
@@ -22,7 +19,7 @@ def load_data():
             return json.load(f)
     return []
 
-SYSTEM_PROMPT = """أنت محلل مشاعر متخصص. مهمتك تحليل النص وإرجاع JSON فقط بدون أي كلام إضافي.
+PROMPT = """أنت محلل مشاعر متخصص. حلل النص وأرجع JSON فقط بدون أي كلام إضافي أو markdown.
 
 الصيغة المطلوبة:
 {
@@ -34,15 +31,17 @@ SYSTEM_PROMPT = """أنت محلل مشاعر متخصص. مهمتك تحليل 
     {"label": "neutral", "score": 8.2},
     {"label": "surprise", "score": 4.1},
     {"label": "sadness", "score": 1.5},
-    {"label": "anger", "score": 0.7}
+    {"label": "anger", "score": 0.7},
+    {"label": "fear", "score": 0.5},
+    {"label": "disgust", "score": 0.3}
   ]
 }
 
 قواعد:
-- emotion: الشعور الأقوى من القائمة المحددة فقط
-- sentiment: positive إذا كان joy أو surprise، negative إذا كان anger/fear/sadness/disgust، neutral إذا كان neutral
-- confidence: نسبة الثقة من 0 إلى 100
-- all_emotions: جميع المشاعر السبعة مرتبة تنازلياً، مجموعها 100
+- emotion: الشعور الأقوى من القائمة فقط
+- sentiment: positive إذا joy أو surprise، negative إذا anger/fear/sadness/disgust، neutral إذا neutral
+- confidence: نسبة الثقة 0-100
+- all_emotions: المشاعر السبعة مرتبة تنازلياً ومجموعها 100
 - لا تضع أي نص خارج الـ JSON"""
 
 @app.route("/analyze", methods=["POST"])
@@ -51,14 +50,8 @@ def analyze():
     if not text:
         return jsonify({"error": "النص فارغ"}), 400
 
-    message = client.messages.create(
-        model="claude-opus-4-5",
-        max_tokens=300,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": f"حلل هذا النص: {text}"}]
-    )
-
-    raw = message.content[0].text.strip()
+    response = model.generate_content(f"{PROMPT}\n\nالنص: {text}")
+    raw = response.text.strip().replace("```json", "").replace("```", "").strip()
     data = json.loads(raw)
     data["text"] = text
     return jsonify(data)
