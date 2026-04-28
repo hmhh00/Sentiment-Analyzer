@@ -1,4 +1,4 @@
-const API = "http://127.0.0.1:5000";
+const API = "https://hmhh00.github.io/Sentiment-Analyzer/";
 
 const emotions = {
   joy:      { ar: "فرح",     icon: "😊", color: "#639922", bg: "#0d1f06" },
