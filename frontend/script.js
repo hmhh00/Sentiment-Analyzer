@@ -39,19 +39,55 @@ async function analyze() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
+      signal: AbortSignal.timeout(60000),
     });
+
+    if (!res.ok) throw new Error("server error");
+
     const data = await res.json();
     lastResult = data;
     showResult(data);
     stats.total++;
     document.getElementById("statTotal").textContent = stats.total;
-  } catch {
-    alert("❌ تعذر الاتصال بالسيرفر. تأكد أن backend شغّال على المنفذ 5000");
+
+  } catch (e) {
+    if (e.name === "TimeoutError") {
+      showToast("⏳ السيرفر يصحى... انتظر 30 ثانية وحاول مرة ثانية", "warn");
+    } else {
+      showToast("⏳ السيرفر يصحى... حاول مرة ثانية بعد قليل", "warn");
+    }
   } finally {
     busy = false;
     btn.disabled = false;
     btn.querySelector(".btn-text").textContent = "حلّل المشاعر";
   }
+}
+
+function showToast(msg, type) {
+  const old = document.getElementById("globalToast");
+  if (old) old.remove();
+
+  const toast = document.createElement("div");
+  toast.id = "globalToast";
+  toast.textContent = msg;
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: ${type === "warn" ? "#2a2010" : "#0a1e18"};
+    color: ${type === "warn" ? "#f0b95a" : "#5DCAA5"};
+    border: 1px solid ${type === "warn" ? "#BA7517" : "#1D9E75"};
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-family: Tajawal, sans-serif;
+    font-size: 14px;
+    z-index: 9999;
+    direction: rtl;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 5000);
 }
 
 function showResult(data) {
@@ -118,6 +154,7 @@ async function sendFeedback(btn, choice) {
         correct_emotion,
         predicted_emotion: lastResult.emotion,
       }),
+      signal: AbortSignal.timeout(30000),
     });
 
     stats.feedback++;
@@ -137,3 +174,6 @@ async function sendFeedback(btn, choice) {
     console.error("Feedback error:", e);
   }
 }
+
+// يصحّي السيرفر تلقائياً لما يفتح الموقع
+fetch(`${API}/stats`, { signal: AbortSignal.timeout(60000) }).catch(() => {});
