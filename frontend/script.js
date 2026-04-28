@@ -1,4 +1,4 @@
-const API = "https://hmhh00.github.io/Sentiment-Analyzer";
+const API = "https://sentiment-analyzer-10zn.onrender.com";
 
 const emotions = {
   joy:      { ar: "فرح",     icon: "😊", color: "#639922", bg: "#0d1f06" },
