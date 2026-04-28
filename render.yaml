@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: sentiment-analyzer-api
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
