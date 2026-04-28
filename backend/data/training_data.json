@@ -1,0 +1,22 @@
+[
+  {
+    "text": "الجو رائع اليوم",
+    "correct_emotion": "joy",
+    "predicted_emotion": "neutral"
+  },
+  {
+    "text": "الجو رائع اليوم",
+    "correct_emotion": "joy",
+    "predicted_emotion": "neutral"
+  },
+  {
+    "text": "الاجواء رائع اليوم",
+    "correct_emotion": "joy",
+    "predicted_emotion": "neutral"
+  },
+  {
+    "text": "الجو رائع اليوم",
+    "correct_emotion": "joy",
+    "predicted_emotion": "neutral"
+  }
+]

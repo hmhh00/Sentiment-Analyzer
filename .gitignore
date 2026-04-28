@@ -4,11 +4,7 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-env/
-ENV/
-.venv/
-venv.bak/
-venv/
 .DS_Store
 *.log
 *.tmp
+
