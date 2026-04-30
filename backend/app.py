@@ -50,7 +50,7 @@ def analyze():
         return jsonify({"error": "النص فارغ"}), 400
 
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-1.5-flash",
         contents=f"{PROMPT}\n\nالنص: {text}"
     )
     raw = response.text.strip().replace("```json", "").replace("```", "").strip()
