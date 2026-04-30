@@ -4,7 +4,7 @@ from google import genai
 import json, os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins="*", methods=["GET", "POST", "OPTIONS"], allow_headers=["Content-Type"])
 
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
