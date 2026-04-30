@@ -1,26 +1,16 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import google.generativeai as genai
+from google import genai
 import json, os
 
 app = Flask(__name__)
 CORS(app)
 
-# تكوين آمن من الفشل
-api_key = os.environ.get("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-1.5-flash")
-else:
-    model = None
+client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 DATA_FILE = "data/training_data.json"
 if not os.path.exists("data"):
     os.makedirs("data")
-
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({"status": "ok", "api_key_configured": model is not None}), 200
 
 def load_data():
     if os.path.exists(DATA_FILE):
@@ -55,14 +45,14 @@ PROMPT = """أنت محلل مشاعر متخصص. حلل النص وأرجع JS
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    if not model:
-        return jsonify({"error": "GEMINI_API_KEY غير معرّف"}), 500
-    
     text = request.json.get("text", "").strip()
     if not text:
         return jsonify({"error": "النص فارغ"}), 400
 
-    response = model.generate_content(f"{PROMPT}\n\nالنص: {text}")
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=f"{PROMPT}\n\nالنص: {text}"
+    )
     raw = response.text.strip().replace("```json", "").replace("```", "").strip()
     data = json.loads(raw)
     data["text"] = text
