@@ -6,12 +6,21 @@ import json, os
 app = Flask(__name__)
 CORS(app)
 
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-1.5-flash")
+# تكوين آمن من الفشل
+api_key = os.environ.get("GEMINI_API_KEY")
+if api_key:
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-1.5-flash")
+else:
+    model = None
 
 DATA_FILE = "data/training_data.json"
 if not os.path.exists("data"):
     os.makedirs("data")
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok", "api_key_configured": model is not None}), 200
 
 def load_data():
     if os.path.exists(DATA_FILE):
@@ -46,6 +55,9 @@ PROMPT = """أنت محلل مشاعر متخصص. حلل النص وأرجع JS
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
+    if not model:
+        return jsonify({"error": "GEMINI_API_KEY غير معرّف"}), 500
+    
     text = request.json.get("text", "").strip()
     if not text:
         return jsonify({"error": "النص فارغ"}), 400
@@ -75,5 +87,5 @@ def stats():
     return jsonify({"total_feedback": len(data)})
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port, debug=False)
