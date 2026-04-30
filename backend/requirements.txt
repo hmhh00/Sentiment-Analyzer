@@ -1,6 +1,7 @@
 flask
 flask-cors
 anthropic
+google-genai
 google-generativeai
 gunicorn
 transformers
