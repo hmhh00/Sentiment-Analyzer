@@ -1,7 +1,8 @@
 const API = "https://api-dev-isolution.xyz/sentiment";
 
 
-const API_KEY = "fzXhoJL9X8Ov4tGcKp61c01hcbRZefi9eRbcS7l6GbLIFJAQ"; // ← حط مفتاحك هنا
+const API_KEY = "fzXhoJL9X8Ov4tGcKp61c01hcbRZefi9eRbcS7l6GbLIFJAQ";
+
 
 const emotions = {
   joy:      { ar: "فرح",     icon: "😊", color: "#639922", bg: "#0d1f06" },
@@ -38,11 +39,10 @@ async function analyze() {
   btn.querySelector(".btn-text").textContent = "جاري التحليل...";
 
   try {
-    const res = await fetch(`${API}/analyze`, {
+    const res = await fetch(`${API}/analyze?apikey=${API_KEY}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": API_KEY
       },
       body: JSON.stringify({ text }),
       signal: AbortSignal.timeout(60000),
@@ -152,11 +152,10 @@ async function sendFeedback(btn, choice) {
   const correct_emotion = choice === "correct" ? lastResult.emotion : choice;
 
   try {
-    await fetch(`${API}/feedback`, {
+    await fetch(`${API}/feedback?apikey=${API_KEY}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": API_KEY
       },
       body: JSON.stringify({
         text: lastResult.text,
@@ -185,7 +184,6 @@ async function sendFeedback(btn, choice) {
 }
 
 // يصحّي السيرفر تلقائياً لما يفتح الموقع
-fetch(`${API}/stats`, {
-  headers: { "x-api-key": API_KEY },
+fetch(`${API}/stats?apikey=${API_KEY}`, {
   signal: AbortSignal.timeout(60000)
 }).catch(() => {});
