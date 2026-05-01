@@ -1,5 +1,8 @@
 const API = "https://api-dev-isolution.xyz/sentiment";
 
+
+const API_KEY = "fzXhoJL9X8Ov4tGcKp61c01hcbRZefi9eRbcS7l6GbLIFJAQ"; // ← حط مفتاحك هنا
+
 const emotions = {
   joy:      { ar: "فرح",     icon: "😊", color: "#639922", bg: "#0d1f06" },
   sadness:  { ar: "حزن",     icon: "😢", color: "#378ADD", bg: "#061526" },
@@ -37,7 +40,10 @@ async function analyze() {
   try {
     const res = await fetch(`${API}/analyze`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY
+      },
       body: JSON.stringify({ text }),
       signal: AbortSignal.timeout(60000),
     });
@@ -148,7 +154,10 @@ async function sendFeedback(btn, choice) {
   try {
     await fetch(`${API}/feedback`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY
+      },
       body: JSON.stringify({
         text: lastResult.text,
         correct_emotion,
@@ -176,4 +185,7 @@ async function sendFeedback(btn, choice) {
 }
 
 // يصحّي السيرفر تلقائياً لما يفتح الموقع
-fetch(`${API}/stats`, { signal: AbortSignal.timeout(60000) }).catch(() => {});
+fetch(`${API}/stats`, {
+  headers: { "x-api-key": API_KEY },
+  signal: AbortSignal.timeout(60000)
+}).catch(() => {});
